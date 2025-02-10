@@ -1,0 +1,53 @@
+name: gitlab-intergation1/aws_intergation
+on:
+  push:
+  workflow_dispatch:
+concurrency:
+  group: "${{ github.ref }}"
+  cancel-in-progress: true
+env:
+  Aws_Public_IP: 52.53.214.54
+  Aws_UserName: ec2-user
+  AWS_SECRET_ACCESS_KEY: |-
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEpAIBAAKCAQEAvtOv0frpZIsywUTpaeZ+TLlyWIMrj7O/qIxOC4Yk9kD5DAWu
+    bHH885ObU+PGmJOoN9K7AMdbUHmzm0YMB/zQgPIycz+r/FplB+Wk0DusATVxlRL4
+    A3yLwtmFPzzfxuOF/s7XXyqvUmez7SmePUpB5DfM7isIPxo7JN0dll8uvCFo5LKO
+    vyTotRolWOJBCkvvo+TSJPtFr8uSWyV7hatOCsNAyBDwnAAfLWPGvPjEVs1JIt5j
+    A0FoQPzcw9KK4aGHWQZ64EN9eUjl+ZcuRDiv4Lt1svGAUrzsWQ5j9i3MwhGGXEgT
+    orbn9vKSQTs9cKMBlrxYCoXgNEpg8RUpFTkYpwIDAQABAoIBAQCwTNrvYKUoYwIt
+    VQFg+bZOJDbkV6tzRFoZ2iZwtyqG6FgvJ0CSqG1OjFzBEHt2k1Si3mouugA/RXEO
+    T5Tl/EiWGS1LFNRMfSdCOIQgbkDnjPy3AaNpdTOafWSBnDgShDpTw71vCvyXYX/1
+    6LFtZqGhu3v1voQL6KwjzrV7K8z9uTYacNf7TCNENmqoR8EIgz8SwapYfzKMNQ2z
+    8cEObyfQfbTd++R2+5qk/0mRTcMdNYtddARZapK5W0sWS9UN4azPDLDt5Q1VLYab
+    EJfm5Ql6xB+euVwizthxUiY49buYNpaSDztqiRRqxw9SHvdP2JGtBwNgHblME3NB
+    oY/GxmnBAoGBAPIZcxKDrD/gdf0B/cK1XRYDO0+fFpH/eD8RK7Jia9l/hnJxtbrI
+    Cz58VsJ/spJZkCLgMtlIXuPl8PwHM2te3pfRm7hFYSJZxx5DA0kMFqeF1wpttK4y
+    NYm8QXrkTtDYlzKMZ36AWlCZ25VsIUAQ1BzdqPl7m60ZmOfJ+RpaqgyJAoGBAMnI
+    mOPNUlevNRmUoPlzk6T0W4XldSuDpSfJXFiEvu4PP2vxhcSWrvBZifhQUfbiqsFI
+    K01UmrlgLd6ZYZC/ZadLPLEBYXRUacQGGi7BdL+me6eeOba6hM0Bp2JZ2Xw3d7ph
+    vMXvdDAu0foaxSbuu9Oz2Mz7UUGxH8cHZVCzqo+vAoGAUGQHBATZM7TTORpqKzeS
+    G3cjQMMw+XX9deO7wNZRvb1M5b/Aeq9mnG8pWBiTMWmwJQSRnfkcGU0HgojZmDO+
+    cmdV8BCJuqBZMEFMW/s5opMc3wei0Z02jfAHRkl9qnfhbRWWYDk6xDzy32EygVWV
+    OaiZLY7QGODBF2bH4upsQRECgYAzRGcsAb+5DYf1PuEDYA0ULQ2P4HO7oY/1ouB2
+    kQudmnwnpc6x2wMJiAZY87dPfdmakAaIeEVzce9VjizOxQJD1gbOhiZHkyboKhC+
+    7mIGS3tBZB8PwSX6nD/16hQqzkD6NtjqhWNE1rB81g5fTOql6BzeP8Aua51CSSvB
+    rFRaewKBgQC6xkCGP8t7PJh0FhcPagvCKzkUcFAoBptJfV/c9fOcl0nLG2/NIOTi
+    l+FkgEyc9ZpXA8M0SXvITpsBgDI43JPPNDanL8k86cncyXSboIO513rAvShsngpA
+    SBQUzSWnACSLDO4L5PRrF+qCpPrxX5Dol7XlqZdWack1VfauGf96yg==
+    -----END RSA PRIVATE KEY-----
+jobs:
+  deploy-aws-job:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4.1.0
+      with:
+        fetch-depth: 20
+        lfs: true
+    - run: mkdir -p ~/.ssh
+    - run: echo "$AWS_SECRET_ACCESS_KEY" > ~/.ssh/id_rsa
+    - run: chmod 600 ~/.ssh/id_rsa
+    - run: echo "Hello Team, Successfully integrated Gitlab" > index.html
+    - run: scp -o StrictHostKeyChecking=no index.html $Aws_UserName@$Aws_Public_IP:/tmp/index.html
+    - run: ssh -o StrictHostKeyChecking=no $Aws_UserName@$Aws_Public_IP "sudo mv /tmp/index.html /var/www/html/index.html"
